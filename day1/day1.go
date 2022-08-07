@@ -35,5 +35,6 @@ func checkIncreaseMeasurement() uint16 {
 }
 
 func RunDay1() {
+	fmt.Println("\nPlease enter depht measurement")
 	fmt.Println("Total of increases", checkIncreaseMeasurement())
 }
