@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/jcardenasc93/adventofcode-go/day1"
+	"github.com/jcardenasc93/adventofcode-go/day2"
 )
 
 var option string
@@ -12,6 +14,8 @@ func main() {
 	switch daySelection {
 	case "1":
 		runDay1()
+	case "2":
+		runDay2()
 	}
 }
 func getDayInput() string {
@@ -23,4 +27,8 @@ func getDayInput() string {
 
 func runDay1() {
 	day1.RunDay1()
+}
+
+func runDay2() {
+	day2.RunDay2()
 }

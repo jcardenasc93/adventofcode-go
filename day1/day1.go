@@ -85,9 +85,9 @@ func popFirstElement(slice *[]int) {
 }
 
 func RunDay1() {
-	// fmt.Println("Running part one")
-	// fmt.Println("\nPlease enter depht measurement")
-	// fmt.Println("Total of increases", checkIncreaseMeasurement1())
+	fmt.Println("Running part one")
+	fmt.Println("\nPlease enter depht measurement")
+	fmt.Println("Total of increases", checkIncreaseMeasurement1())
 	fmt.Println("Running part two")
 	fmt.Println("Total of increases", checkIncreaseMeasurement2())
 }
