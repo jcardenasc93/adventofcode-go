@@ -5,6 +5,7 @@ import (
 
 	"github.com/jcardenasc93/adventofcode-go/day1"
 	"github.com/jcardenasc93/adventofcode-go/day2"
+	"github.com/jcardenasc93/adventofcode-go/day3"
 )
 
 var option string
@@ -16,6 +17,8 @@ func main() {
 		runDay1()
 	case "2":
 		runDay2()
+	case "3":
+		runDay3()
 	}
 }
 func getDayInput() string {
@@ -31,4 +34,8 @@ func runDay1() {
 
 func runDay2() {
 	day2.RunDay2()
+}
+
+func runDay3() {
+	day3.RunDay3()
 }
