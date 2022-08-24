@@ -3,13 +3,14 @@ package day4
 import (
 	"bufio"
 	"fmt"
+	"golang.org/x/exp/slices"
 	"os"
 	"strconv"
 	"strings"
 )
 
 func RunDay4() {
-	fmt.Println("Input bingo data:")
+	fmt.Println("Reading input file...")
 	readInputFile()
 }
 
@@ -49,18 +50,12 @@ func readInputFile() {
 		fmt.Println(err)
 	}
 	bingoEvaluate(&bingData)
+	bingoEvaluateLast(&bingData)
 }
 
 func bingoEvaluator(input string, bingData *BingoData) {
 	boardsCounter := len(bingData.boards)
-	if input == "" {
-		if len(bingData.tempCol) == boardSize {
-			// Board numbers are complete. So add board & reset 2d slice
-			bingData.boards[boardsCounter] = bingData.tempCol
-			bingData.tempCol = [][]int{}
-		}
-
-	} else {
+	if input != "" {
 		if strings.Index(input, ",") != -1 {
 			bingData.inNums = strings.Split(input, ",")
 		} else {
@@ -76,27 +71,60 @@ func bingoEvaluator(input string, bingData *BingoData) {
 				bingData.tempCol = append(bingData.tempCol, bingData.tempRow)
 				bingData.tempRow = []int{}
 			}
+			if len(bingData.tempCol) == boardSize {
+				// Board numbers are complete. So add board & reset 2d slice
+				bingData.boards[boardsCounter] = bingData.tempCol
+				bingData.tempCol = [][]int{}
+			}
 		}
+
 	}
 }
 
 func bingoEvaluate(bingoData *BingoData) {
 	winner := false
-	var board int
 	for i, n := range bingData.inNums {
 		m, _ := strconv.Atoi(n)
-		if i < boardSize-1 {
-			markNums(&bingData, m)
-		} else {
-			markNums(&bingData, m)
-			winner, board = checkWin(bingoData)
+		for j := 0; j < len(bingoData.boards); j++ {
+			board := bingoData.boards[j]
+			markNums(board, m)
+			if i > boardSize-1 {
+				winner = checkWin(board, true)
+				if winner {
+					fmt.Printf("Board No %v wins with number %v\n", j, m)
+					calcScore(bingoData, m, j)
+					break
+				}
+			}
 		}
 		if winner {
-			fmt.Printf("Board No %v wins with number %v\n", board, m)
-			calcScore(bingoData, m, board)
 			break
 		}
 	}
+}
+
+func bingoEvaluateLast(bingoData *BingoData) {
+	winner := false
+	var winboards []int
+	var lastn int
+	for i := 0; i < len(bingoData.inNums); i++ {
+		n := bingoData.inNums[i]
+		m, _ := strconv.Atoi(n)
+		for j := 0; j < len(bingoData.boards); j++ {
+			if slices.Contains(winboards, j) == false {
+				board := bingoData.boards[j]
+				markNums(board, m)
+				if i > boardSize-1 {
+					winner = checkWin(board, false)
+					if winner {
+						winboards = append(winboards, j)
+						lastn = m
+					}
+				}
+			}
+		}
+	}
+	calcScore(bingoData, lastn, winboards[len(winboards)-1])
 }
 
 func calcScore(bingData *BingoData, n int, b int) {
@@ -113,62 +141,64 @@ func calcScore(bingData *BingoData, n int, b int) {
 
 }
 
-func markNums(bingData *BingoData, n int) {
-	for _, board := range bingData.boards {
-		for i := 0; i < boardSize; i++ {
-			for j := 0; j < boardSize; j++ {
-				if board[i][j] == n {
-					board[i][j] = -1
-				}
+func markNums(board [][]int, n int) {
+	for i := 0; i < boardSize; i++ {
+		for j := 0; j < boardSize; j++ {
+			if board[i][j] == n {
+				board[i][j] = -1
 			}
 		}
 
 	}
 }
 
-func checkWin(bingData *BingoData) (bool, int) {
+func checkWin(board [][]int, stop bool) bool {
 	gotWinner := false
-	boardn := -1
 
 	// Check cols
-	for b := 0; b < len(bingData.boards); b++ {
-		board := bingData.boards[b]
-		for i := 0; i < boardSize; i++ {
-			if board[i][0] == -1 {
+	// for i := 0; i < boardSize; i++ {
+	// 	if board[i][0] == -1 {
+	// 		gotWinner = true
+	// 	} else {
+	// 		gotWinner = false
+	// 	}
+	// }
+	for i := 0; i < boardSize; i++ {
+		for j := 0; j < boardSize; j++ {
+			if board[j][i] == -1 {
 				gotWinner = true
-				boardn = b
 			} else {
+				// if one of the nums is not marked continue with the next col
 				gotWinner = false
 				break
 			}
+			if j == boardSize-1 && gotWinner == true {
+				break
+			}
+		}
+		if gotWinner {
+			break
 		}
 	}
 	if gotWinner == false {
 		// Check rows
-		for b := 0; b < len(bingData.boards); b++ {
-			board := bingData.boards[b]
-			for i := 0; i < boardSize; i++ {
-				for j := 0; j < boardSize; j++ {
-					if board[i][j] == -1 {
-						gotWinner = true
-					} else {
-						// if one of the nums is not marked continue with the next row
-						gotWinner = false
-						break
-					}
-					if j == boardSize-1 && gotWinner == true {
-						break
-					}
+		for i := 0; i < boardSize; i++ {
+			for j := 0; j < boardSize; j++ {
+				if board[i][j] == -1 {
+					gotWinner = true
+				} else {
+					// if one of the nums is not marked continue with the next row
+					gotWinner = false
+					break
 				}
-				if gotWinner {
+				if j == boardSize-1 && gotWinner == true {
 					break
 				}
 			}
 			if gotWinner {
-				boardn = b
 				break
 			}
 		}
 	}
-	return gotWinner, boardn
+	return gotWinner
 }
