@@ -81,5 +81,94 @@ func bingoEvaluator(input string, bingData *BingoData) {
 }
 
 func bingoEvaluate(bingoData *BingoData) {
-	fmt.Println(bingoData)
+	winner := false
+	var board int
+	for i, n := range bingData.inNums {
+		m, _ := strconv.Atoi(n)
+		if i < boardSize-1 {
+			markNums(&bingData, m)
+		} else {
+			markNums(&bingData, m)
+			winner, board = checkWin(bingoData)
+		}
+		if winner {
+			fmt.Printf("Board No %v wins with number %v\n", board, m)
+			calcScore(bingoData, m, board)
+			break
+		}
+	}
+}
+
+func calcScore(bingData *BingoData, n int, b int) {
+	sum := 0
+	board := bingData.boards[b]
+	for i := 0; i < boardSize; i++ {
+		for j := 0; j < boardSize; j++ {
+			if board[i][j] != -1 {
+				sum += board[i][j]
+			}
+		}
+	}
+	fmt.Println("Score is:", sum*n)
+
+}
+
+func markNums(bingData *BingoData, n int) {
+	for _, board := range bingData.boards {
+		for i := 0; i < boardSize; i++ {
+			for j := 0; j < boardSize; j++ {
+				if board[i][j] == n {
+					board[i][j] = -1
+				}
+			}
+		}
+
+	}
+}
+
+func checkWin(bingData *BingoData) (bool, int) {
+	gotWinner := false
+	boardn := -1
+
+	// Check cols
+	for b := 0; b < len(bingData.boards); b++ {
+		board := bingData.boards[b]
+		for i := 0; i < boardSize; i++ {
+			if board[i][0] == -1 {
+				gotWinner = true
+				boardn = b
+			} else {
+				gotWinner = false
+				break
+			}
+		}
+	}
+	if gotWinner == false {
+		// Check rows
+		for b := 0; b < len(bingData.boards); b++ {
+			board := bingData.boards[b]
+			for i := 0; i < boardSize; i++ {
+				for j := 0; j < boardSize; j++ {
+					if board[i][j] == -1 {
+						gotWinner = true
+					} else {
+						// if one of the nums is not marked continue with the next row
+						gotWinner = false
+						break
+					}
+					if j == boardSize-1 && gotWinner == true {
+						break
+					}
+				}
+				if gotWinner {
+					break
+				}
+			}
+			if gotWinner {
+				boardn = b
+				break
+			}
+		}
+	}
+	return gotWinner, boardn
 }
