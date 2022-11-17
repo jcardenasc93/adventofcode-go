@@ -35,26 +35,26 @@ func readInputFile() {
 }
 
 func processLanternFish(input string) {
-	var lanternFishState []int
+	lanternFishState := []int{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	for _, fish := range strings.Split(input, ",") {
 		fishInt, err := strconv.Atoi(fish)
 		checkError(err)
-		lanternFishState = append(lanternFishState, fishInt)
+		lanternFishState[fishInt] += 1
 	}
-	days := 80
-	for i := 1; i <= days; i++ {
-		nextDay(&lanternFishState)
-	}
-	fmt.Println("After", days, "days there is a total of ", len(lanternFishState))
-}
-
-func nextDay(fish *[]int) {
-	for i := range *fish {
-		f := &(*fish)[i]
-		*f -= 1
-		if *f < 0 {
-			*f = 6
-			*fish = append(*fish, 8)
+	days := 256
+	for i := 0; i < days; i++ {
+		d0 := lanternFishState[0]
+		lanternFishState[0] = 0
+		for j := 1; j < 9; j++ {
+			lanternFishState[j-1] = lanternFishState[j]
+			lanternFishState[j] = 0
 		}
+		lanternFishState[8] = d0
+		lanternFishState[6] += d0
 	}
+	count := 0
+	for _, fish := range lanternFishState {
+		count += fish
+	}
+	fmt.Println("After", days, "days there is a total of ", count)
 }
