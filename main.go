@@ -11,6 +11,7 @@ import (
 	"github.com/jcardenasc93/adventofcode-go/day6"
 	"github.com/jcardenasc93/adventofcode-go/day7"
 	"github.com/jcardenasc93/adventofcode-go/day8"
+	"github.com/jcardenasc93/adventofcode-go/day9"
 )
 
 var option string
@@ -34,13 +35,15 @@ func main() {
 		runDay7()
 	case "8":
 		runDay8()
+	case "9":
+		runDay9()
 	}
 }
 func getDayInput() string {
 	// fmt.Printf("Input day to solve: ")
 	// fmt.Scanf("%s", &option)
 	// fmt.Printf("Running solution for day %s\n", option)
-	return "8"
+	return "9"
 }
 
 func runDay1() {
@@ -73,4 +76,8 @@ func runDay7() {
 
 func runDay8() {
 	day8.RunDay8()
+}
+
+func runDay9() {
+	day9.RunDay9()
 }
