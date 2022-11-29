@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/jcardenasc93/adventofcode-go/utils"
 )
@@ -36,7 +37,8 @@ type MapProcessor struct {
 	heightMap    []string
 	lowPoints    []int
 	currentPoint *Point
-	movements    [][]int
+	basins       []Point
+	basinsGroups [][]Point
 }
 
 func processMap(hMap []string) {
@@ -61,8 +63,44 @@ func processMap(hMap []string) {
 			}
 		}
 	}
-	fmt.Println(processor.lowPoints)
-	fmt.Println(riskLevel)
+	fmt.Println("risk level: ", riskLevel)
+
+	// Basins
+	basins := []int{}
+	maxY := len(processor.heightMap)
+	maxX := len(processor.heightMap[0])
+
+	data := processor.dataToDigit()
+
+	for x := 0; x < maxX; x++ {
+		for y := 0; y < maxY; y++ {
+			basinSize := lookForBasins(&data, x, y)
+			if basinSize > 0 {
+				basins = append(basins, basinSize)
+			}
+		}
+	}
+	sort.Slice(basins, func(i, j int) bool {
+		return basins[i] > basins[j]
+	})
+
+	totalProduct := 1
+	for _, b := range basins[:3] {
+		totalProduct *= b
+	}
+	fmt.Println(totalProduct)
+}
+
+func (processor *MapProcessor) dataToDigit() [][]int {
+	dataInt := [][]int{}
+	for i := 0; i < len(processor.heightMap); i++ {
+		row := []int{}
+		for j := 0; j < len(processor.heightMap[0]); j++ {
+			row = append(row, utils.ParseStrInt(string(processor.heightMap[i][j])))
+		}
+		dataInt = append(dataInt, row)
+	}
+	return dataInt
 }
 
 func (processor *MapProcessor) checkLowest() bool {
@@ -109,4 +147,35 @@ func (processor *MapProcessor) getMoves() []string {
 	}
 
 	return generalMoves
+}
+
+func lookForBasins(data *[][]int, x int, y int) int {
+	if isReachable(data, x, y) == false {
+		return 0
+	}
+	// Mark as visited
+	(*data)[y][x] = 9
+	var moves = [4][2]int{
+		{-1, 0},
+		{0, 1},
+		{1, 0},
+		{0, -1},
+	}
+	count := 1
+	for _, m := range moves {
+		nextX := x + m[1]
+		nextY := y + m[0]
+		count += lookForBasins(data, nextX, nextY)
+	}
+	return count
+}
+
+func inBounds(data *[][]int, x int, y int) bool {
+	yBound := len(*data)
+	xBound := len((*data)[0])
+	return x >= 0 && x < xBound && y >= 0 && y < yBound
+}
+
+func isReachable(data *[][]int, x int, y int) bool {
+	return inBounds(data, x, y) && (*data)[y][x] < 9
 }
