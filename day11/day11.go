@@ -25,6 +25,7 @@ func readInputFile() {
 		}
 	}
 	runSteps(octopuses, 100)
+	findTotalFlash(octopuses)
 }
 
 type point struct {
@@ -36,6 +37,22 @@ type octoLevels struct {
 	octs       [10][10]int
 	flashes    []point
 	flashCount int
+}
+
+func findTotalFlash(octopuses []string) {
+	ol := octoLevels{}
+	for i := 0; i < len(octopuses); i++ {
+		for j, v := range octopuses[i] {
+			ol.octs[i][j] = utils.ParseStrInt(string(v))
+		}
+	}
+
+	i := 0
+	for len(ol.flashes) != 100 {
+		ol.step()
+		i += 1
+	}
+	fmt.Println("step:", i)
 }
 
 func runSteps(octopuses []string, n int) {
@@ -50,12 +67,6 @@ func runSteps(octopuses []string, n int) {
 		ol.step()
 	}
 
-	for _, i := range ol.octs {
-		for _, j := range i {
-			fmt.Printf("%d", j)
-		}
-		fmt.Println()
-	}
 	fmt.Println("total flashes:", ol.flashCount)
 }
 
