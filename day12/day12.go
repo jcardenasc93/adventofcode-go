@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"unicode"
 
 	"github.com/jcardenasc93/adventofcode-go/utils"
 )
@@ -57,7 +56,7 @@ func findPaths(cave string) {
 		pathsCount += 1
 		return
 	}
-	if isLower(cave) {
+	if utils.IsLower(cave) {
 		visited[cave] += 1
 		if visited[cave] > 1 {
 			visited[cave] -= 1
@@ -77,7 +76,7 @@ func findPaths2(cave string) {
 		pathsCount += 1
 		return
 	}
-	if isLower(cave) {
+	if utils.IsLower(cave) {
 		visited[cave] += 1
 		if reachMaxVisits(&visited, cave) {
 			return
@@ -89,15 +88,6 @@ func findPaths2(cave string) {
 		}
 	}
 	visited[cave] -= 1
-}
-
-func isLower(s string) bool {
-	for _, r := range s {
-		if !unicode.IsLower(r) && unicode.IsLetter(r) {
-			return false
-		}
-	}
-	return true
 }
 
 func reachMaxVisits(visited *map[string]int, cave string) bool {

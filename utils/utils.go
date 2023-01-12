@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 func CheckError(err error) {
@@ -48,4 +49,13 @@ func DelItem[T comparable](slice []T, item T) []T {
 		}
 	}
 	return resp
+}
+
+func IsLower(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLower(r) && unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
 }
