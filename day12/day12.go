@@ -28,6 +28,10 @@ func readInputFile() {
 	fmt.Println(pathsGraph.adjList)
 	findPaths("start")
 	fmt.Println(pathsCount)
+	pathsCount = 0
+	visited = make(map[string]int)
+	findPaths2("start")
+	fmt.Println(pathsCount)
 }
 
 var pathsGraph = Graph{
@@ -68,6 +72,25 @@ func findPaths(cave string) {
 	visited[cave] -= 1
 }
 
+func findPaths2(cave string) {
+	if cave == "end" {
+		pathsCount += 1
+		return
+	}
+	if isLower(cave) {
+		visited[cave] += 1
+		if reachMaxVisits(&visited, cave) {
+			return
+		}
+	}
+	for _, c := range pathsGraph.adjList[cave] {
+		if c != "start" {
+			findPaths2(c)
+		}
+	}
+	visited[cave] -= 1
+}
+
 func isLower(s string) bool {
 	for _, r := range s {
 		if !unicode.IsLower(r) && unicode.IsLetter(r) {
@@ -75,4 +98,25 @@ func isLower(s string) bool {
 		}
 	}
 	return true
+}
+
+func reachMaxVisits(visited *map[string]int, cave string) bool {
+	maxLower := 2
+	var twiceCount int
+	for _, v := range *visited {
+		if v > 1 {
+			twiceCount += 1
+		}
+		if v > maxLower {
+			(*visited)[cave] -= 1
+			return true
+		}
+	}
+
+	if twiceCount > 1 {
+		(*visited)[cave] -= 1
+		return true
+	}
+
+	return false
 }
