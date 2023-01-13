@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"unicode"
@@ -58,4 +59,13 @@ func IsLower(s string) bool {
 		}
 	}
 	return true
+}
+
+func IsMapIn[T comparable](mapSlice *[]map[string]T, mA map[string]T) bool {
+	for _, m := range *mapSlice {
+		if reflect.DeepEqual(m, mA) {
+			return true
+		}
+	}
+	return false
 }
