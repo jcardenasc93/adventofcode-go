@@ -19,48 +19,64 @@ func readInputFile() {
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	fold := []string{}
-	var coords []map[string]int
+	var origamiPoints []map[string]int
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line != "" {
 			if strings.Contains(line, "fold") {
 				line := strings.Split(line, " ")
 				splitLine := strings.Split(line[2], "=")
-				fold = append(fold, splitLine...)
-				break
+				fold = append([]string{}, splitLine...)
+				origamiPoints = applyFold(&origamiPoints, fold)
+				// break
+			} else {
+				origamiPoints = append(origamiPoints, getCoords(line))
 			}
-			coords = append(coords, getCoords(line))
 		}
 	}
-	applyFold(&coords, fold)
+	printOrigami(&origamiPoints)
 }
+
+var maxX, maxY int
 
 func getCoords(cord string) map[string]int {
 	mapCord := make(map[string]int)
 	cords := strings.Split(cord, ",")
-	mapCord["x"] = utils.ParseStrInt(cords[0])
-	mapCord["y"] = utils.ParseStrInt(cords[1])
+	x_ := utils.ParseStrInt(cords[0])
+	y_ := utils.ParseStrInt(cords[1])
+	mapCord["x"] = x_
+	mapCord["y"] = y_
 	return mapCord
 }
 
-func applyFold(coords *[]map[string]int, fold []string) {
+func applyFold(coords *[]map[string]int, fold []string) []map[string]int {
 	foldDir := fold[0]
 	foldLine := utils.ParseStrInt(fold[1])
-	pointsCount := 0
+	updateMax(foldLine, foldDir)
+	var leftPoints []map[string]int
 
 	for _, coord := range *coords {
 		if coord[foldDir] < foldLine {
-			pointsCount += 1
+			leftPoints = append(leftPoints, coord)
 		} else {
-			if !(isOverlaping(coords, coord, foldDir, foldLine)) {
-				pointsCount += 1
+			point, overlaping := isOverlaping(&leftPoints, coord, foldDir, foldLine)
+			if !overlaping {
+				leftPoints = append(leftPoints, point)
 			}
 		}
 	}
-	fmt.Println(pointsCount)
+	return leftPoints
 }
 
-func isOverlaping(coords *[]map[string]int, coord map[string]int, foldDir string, foldLine int) bool {
+func updateMax(value int, axis string) {
+	if axis == "x" {
+		maxX = value
+	} else {
+		maxY = value
+	}
+}
+
+func isOverlaping(coords *[]map[string]int, coord map[string]int, foldDir string, foldLine int) (map[string]int, bool) {
 	partialCord := map[string]int{}
 	partialCord[foldDir] = 2*foldLine - coord[foldDir]
 	if foldDir == "x" {
@@ -68,6 +84,31 @@ func isOverlaping(coords *[]map[string]int, coord map[string]int, foldDir string
 	} else {
 		partialCord["x"] = coord["x"]
 	}
-	return utils.IsMapIn(coords, partialCord)
 
+	return partialCord, utils.IsMapIn(coords, partialCord)
+}
+
+func printOrigami(origamiPoints *[]map[string]int) {
+	origami := make([][]string, maxY)
+	var pointsCount int
+	for i := range origami {
+		origami[i] = make([]string, maxX)
+	}
+
+	for _, point := range *origamiPoints {
+		origami[point["y"]][point["x"]] = "#"
+		pointsCount += 1
+	}
+
+	fmt.Println(pointsCount)
+
+	for y := 0; y < maxY; y++ {
+		for x := 0; x < maxX; x++ {
+			if origami[y][x] == "" {
+				fmt.Printf(" ")
+			}
+			fmt.Printf("%s", origami[y][x])
+		}
+		fmt.Println()
+	}
 }
