@@ -8,6 +8,7 @@ import (
 	"github.com/jcardenasc93/adventofcode-go/day11"
 	"github.com/jcardenasc93/adventofcode-go/day12"
 	"github.com/jcardenasc93/adventofcode-go/day13"
+	"github.com/jcardenasc93/adventofcode-go/day14"
 	"github.com/jcardenasc93/adventofcode-go/day2"
 	"github.com/jcardenasc93/adventofcode-go/day3"
 	"github.com/jcardenasc93/adventofcode-go/day4"
@@ -49,13 +50,15 @@ func main() {
 		runDay12()
 	case "13":
 		runDay13()
+	case "14":
+		runDay14()
 	}
 }
 func getDayInput() string {
 	// fmt.Printf("Input day to solve: ")
 	// fmt.Scanf("%s", &option)
 	// fmt.Printf("Running solution for day %s\n", option)
-	return "13"
+	return "14"
 }
 
 func runDay1() {
@@ -108,4 +111,8 @@ func runDay12() {
 
 func runDay13() {
 	day13.RunDay13()
+}
+
+func runDay14() {
+	day14.RunDay14()
 }
