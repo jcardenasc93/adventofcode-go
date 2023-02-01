@@ -50,38 +50,44 @@ func processTransmission(l string) {
 	for _, hex := range l {
 		binary = fmt.Sprintf("%s%s", binary, hexaBin[string(hex)])
 	}
-	fmt.Println(binary)
 	packets := list.New()
 	packets.PushBack(binary)
 	findVersions(packets)
+	fmt.Println(versionSum)
 }
 
 var versionSum int
 
 func findVersions(packets *list.List) {
 	literal := 4
+	var left string
 
 	for packets.Len() > 0 {
 		front := packets.Front()
 		bin := front.Value.(string)
 		packets.Remove(front)
-		pv := parse3Bits(bin, 0, 3)
-		versionSum += pv
-		tID := parse3Bits(bin, 3, 6)
-		if tID == literal {
-			i := 6
-			for string(bin[i]) != "0" {
-				i += 5
+		if !(onlyZeros(bin)) {
+			if len(bin) > 6 {
+				_, tID := getPacketVType(bin)
+				if tID == literal {
+					left = handleLiteral(bin)
+				} else {
+					left = handleOperator(bin)
+				}
 			}
-			i += 4
-			left := bin[i:]
 			if len(left) > 6 {
-				packets.PushBack(bin[i:])
+				packets.PushBack(left)
 				findVersions(packets)
 			}
 		}
 	}
-	fmt.Println(versionSum)
+}
+
+func getPacketVType(bin string) (pv, tID int) {
+	pv = parse3Bits(bin, 0, 3)
+	versionSum += pv
+	tID = parse3Bits(bin, 3, 6)
+	return pv, tID
 }
 
 func parse3Bits(s string, start int, end int) int {
@@ -90,11 +96,42 @@ func parse3Bits(s string, start int, end int) int {
 	return int(v)
 }
 
-// func getSubPacks(pack string) []string {
-// 	subPacks := []string{}
-// 	if string(pack[7]) == "0" {
-// 		subPacksBits, _ := strconv.ParseUint(pack[8:24], 2, 8)
-//
-// 	}
-// 	return subPacks
-// }
+func handleLiteral(literal string) (left string) {
+	i := 6
+	for string(literal[i]) != "0" {
+		i += 5
+	}
+	i += 5
+	left = literal[i:]
+
+	return left
+}
+
+func handleOperator(operator string) (left string) {
+	if string(operator[6]) == "0" {
+		left = operator[7+15:]
+	} else {
+		left = operator[7+11:]
+	}
+
+	return left
+}
+
+func getSubPacksBitsLen(bin string) int {
+	bitsLen, _ := strconv.ParseUint(bin[7:7+15], 2, 8)
+	return int(bitsLen)
+}
+
+func getSubPacksNum(bin string) int {
+	packs, _ := strconv.ParseUint(bin[7:7+11], 2, 8)
+	return int(packs)
+}
+
+func onlyZeros(bin string) bool {
+	for _, c := range bin {
+		if string(c) != "0" {
+			return false
+		}
+	}
+	return true
+}
